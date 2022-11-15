@@ -21,3 +21,4 @@ const fetchReviews = () => {
 };
 
 module.exports = {fetchCategories, fetchReviews};
+

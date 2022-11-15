@@ -1,4 +1,6 @@
+
 const {fetchCategories, fetchReviews} = require('../models/models.js')
+
 
 const getCategories = (req, res) => {
     fetchCategories()
@@ -15,3 +17,4 @@ const getReviews = (req, res, next) => {
 };
 
 module.exports = {getCategories, getReviews};
+

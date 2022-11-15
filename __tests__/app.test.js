@@ -28,6 +28,7 @@ describe('3: /api/categories', () => {
     });
 });
 
+
 describe('4: /api/reviews', () => {
     test('GET: 200 - responds with reviews array of review objects, with correct properties', () => {
         return request(app)
@@ -58,4 +59,4 @@ describe('4: /api/reviews', () => {
             });
     });
 });
-test('test', () => {})
+
