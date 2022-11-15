@@ -1,4 +1,5 @@
 const db = require('../db/connections.js');
+const {checkReviewIdExists} = require('../db/seeds/utils.js');
 
 const fetchCategories = () => {
     return db.query(`SELECT * FROM categories`)
@@ -36,5 +37,19 @@ const fetchReviewById = (review_id) => {
     })
 };
 
-module.exports = {fetchCategories, fetchReviews, fetchReviewById};
+const fetchCommentByReviewId = (review_id) => {
+    return checkReviewIdExists(review_id)
+        .then(() => {
+            return db.query(`
+                SELECT * FROM comments
+                WHERE review_id = $1
+                ORDER BY created_at DESC;
+            `, [review_id])
+            .then((result) => {
+                return result.rows;
+            });
+        });
+};
+
+module.exports = {fetchCategories, fetchReviews, fetchReviewById, fetchCommentByReviewId};
 
