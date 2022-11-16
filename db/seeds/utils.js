@@ -34,3 +34,15 @@ exports.checkReviewIdExists = (review_id) => {
 		};
 	});
 };
+
+exports.checkUserExistsInUsers = (username) => {
+	return db.query(`
+		SELECT * FROM users
+		WHERE username = $1;
+	`, [username])
+	.then((res) => {
+		if (res.rows.length === 0){
+			return Promise.reject({status: 400, msg: `user not found`});
+		};
+	});
+};
