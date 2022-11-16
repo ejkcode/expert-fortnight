@@ -96,3 +96,57 @@ describe('5: /api/reviews/:review_id', () => {
             });
     });
 });
+
+describe('6: /api/reviews/:review_id/comments', () => {
+    test('GET: 200 - responds with array of comments for given review_id, each with correct properties', () => {
+        return request(app)
+            .get('/api/reviews/2/comments')
+            .expect(200)
+            .then(({body}) => {
+                expect(body.comments.length).toBe(3);
+                body.comments.forEach((comment) => {
+                    expect(comment).toMatchObject({
+                        comment_id: expect.any(Number),
+                        votes: expect.any(Number),
+                        created_at: expect.any(String),
+                        author: expect.any(String),
+                        review_id: 2
+                    });
+                });
+            });
+
+    });
+    test('GET: 200 - array of comments ordered with most recent comments first', () => {
+        return request(app)
+            .get('/api/reviews/2/comments')
+            .expect(200)
+            .then(({body}) => {
+                expect(body.comments).toBeSortedBy('created_at', {descending: true});
+            });
+    });
+    test('GET: 200 - responds with empty array when given review_id which is valid but has no associated comments', () => {
+        return request(app)
+            .get('/api/reviews/5/comments')
+            .expect(200)
+            .then(({body}) => {
+                expect(body.comments.length).toBe(0);
+                expect(body.comments).toEqual([]);
+            });
+    });
+    test('GET: 400 - invalid review_id given', () => {
+        return request(app)
+            .get('/api/reviews/apple/comments')
+            .expect(400)
+            .then(({body}) => {
+                expect(body.msg).toBe('invalid user input');
+            });
+    });
+    test('GET: 404 - valid review_id but non-existent', () => {
+        return request(app)
+            .get('/api/reviews/1000/comments')
+            .expect(404)
+            .then(({body}) => {
+                expect(body.msg).toBe('review_id not found');
+            });
+    });
+});
