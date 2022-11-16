@@ -150,3 +150,74 @@ describe('6: /api/reviews/:review_id/comments', () => {
             });
     });
 });
+
+describe('7: /api/reviews/:review_id/comments', () => {
+    test('POST: 201 - responds with posted comment when given request body containing object with username and body properties', () => {
+        const newComment = {
+            username: 'bainesface',
+            body: 'I thought this game was awesome!'
+        };
+        return request(app)
+            .post('/api/reviews/1/comments')
+            .send(newComment)
+            .expect(201)
+            .then(({body}) => {
+                expect(body.comment).toMatchObject({
+                    body: 'I thought this game was awesome!',
+                    author: 'bainesface',
+                    review_id: 1,
+                    created_at: expect.any(String),
+                    votes: 0
+                });
+            });
+    });
+    test('POST: 400 - review_id given is invalid', () => {
+        const newComment = {
+            username: 'bainesface',
+            body: 'I thought this game was awesome!'
+        };
+        return request(app)
+            .post('/api/reviews/banana/comments')
+            .send(newComment)
+            .expect(400)
+            .then(({body}) => {
+                expect(body.msg).toBe('invalid user input');
+            });
+    });
+    test('POST: 400 - missing username or body in request body, `bad request`', () => {
+        const newComment = {body: 'It was alright'};
+        return request(app)
+            .post('/api/reviews/1/comments')
+            .send(newComment)
+            .expect(400)
+            .then(({body}) => {
+                expect(body.msg).toBe('missing username and/or body properties in request body');
+            });
+    });
+    test('POST: 404 - review_id is valid but non-existent, review_id not found', () => {
+        const newComment = {
+            username: 'dav3rid',
+            body: 'I liked it'
+        };
+        return request(app)
+            .post('/api/reviews/1000/comments')
+            .send(newComment)
+            .expect(404)
+            .then(({body}) => {
+                expect(body.msg).toBe('review_id not found');
+            });
+    });
+    test('POST: 400 - username given is not found in users table', () => {
+        const newComment = {
+            username: 'badUser',
+            body: 'I really liked it'
+        };
+        return  request(app)
+            .post('/api/reviews/3/comments')
+            .send(newComment)
+            .expect(400)
+            .then(({body}) => {
+                expect(body.msg).toBe('user not found');
+            });
+    });
+});

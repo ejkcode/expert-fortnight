@@ -1,5 +1,5 @@
 const db = require('../db/connections.js');
-const {checkReviewIdExists} = require('../db/seeds/utils.js');
+const {checkReviewIdExists, checkUserExistsInUsers} = require('../db/seeds/utils.js');
 
 const fetchCategories = () => {
     return db.query(`SELECT * FROM categories`)
@@ -51,5 +51,31 @@ const fetchCommentByReviewId = (review_id) => {
         });
 };
 
-module.exports = {fetchCategories, fetchReviews, fetchReviewById, fetchCommentByReviewId};
+const addCommentByReviewId = (review_id, newComment) => {
+    if (!newComment.username || !newComment.body) {
+        return Promise.reject({
+            status: 400,
+            msg: 'missing username and/or body properties in request body'
+        });
+    };
+    return checkReviewIdExists(review_id)
+    .then(() => {
+        return checkUserExistsInUsers(newComment.username)
+        .then(() => {
+            return db.query(`
+            INSERT INTO comments
+            (author, body, review_id)
+            VALUES
+            ($1, $2, $3)
+            RETURNING *;
+            `, [newComment.username, newComment.body, review_id])
+            .then((result) => {
+                return result.rows[0];
+            });
+            
+        });
+    });
+};
+
+module.exports = {fetchCategories, fetchReviews, fetchReviewById, fetchCommentByReviewId, addCommentByReviewId};
 
