@@ -1,4 +1,4 @@
-const {fetchCategories, fetchReviews, fetchReviewById, fetchCommentByReviewId, addCommentByReviewId, updateReviewById} = require('../models/models.js')
+const {fetchCategories, fetchReviews, fetchReviewById, fetchCommentByReviewId, addCommentByReviewId, updateReviewById, fetchUsers} = require('../models/models.js')
 
 const getCategories = (req, res) => {
     fetchCategories()
@@ -60,5 +60,11 @@ const patchReviewById = (req, res, next) => {
         });
 };
 
-module.exports = {getCategories, getReviews, getReviewById, getCommentByReviewId, postCommentByReviewId, patchReviewById};
+const getUsers = (req, res, next) => {
+    fetchUsers().then((users) => {
+        res.status(200).send({users});
+    });
+}
+
+module.exports = {getCategories, getReviews, getReviewById, getCommentByReviewId, postCommentByReviewId, patchReviewById, getUsers};
 
