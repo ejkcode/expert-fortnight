@@ -103,5 +103,12 @@ const updateReviewById = (review_id, inc_votes) => {
     })
 };
 
-module.exports = {fetchCategories, fetchReviews, fetchReviewById, fetchCommentByReviewId, addCommentByReviewId, updateReviewById};
+const fetchUsers = () => {
+    return db.query(`SELECT * FROM users`)
+        .then((result) => {
+            return result.rows;
+        });
+};
+
+module.exports = {fetchCategories, fetchReviews, fetchReviewById, fetchCommentByReviewId, addCommentByReviewId, updateReviewById, fetchUsers};
 
