@@ -95,6 +95,27 @@ describe('5: /api/reviews/:review_id', () => {
                 expect(body.msg).toBe('invalid user input');
             });
     });
+    describe('10: /api/reviews/;review_id (comment count)', () => {
+        test('GET: 200 - review response object includes a comment_count property: total count of all comments with this review_id', () => {
+            return request(app)
+                .get('/api/reviews/2')
+                .expect(200)
+                .then(({body}) => {
+                    expect(body.review).toMatchObject({
+                        review_id: 2,
+                        title: expect.any(String),
+                        review_body: expect.any(String),
+                        designer: expect.any(String),
+                        review_img_url: expect.any(String),
+                        votes: expect.any(Number),
+                        category: expect.any(String),
+                        owner: expect.any(String),
+                        created_at: expect.any(String),
+                        comment_count: '3'
+                    })
+                })
+        });
+    });
 });
 
 describe('6: /api/reviews/:review_id/comments', () => {
