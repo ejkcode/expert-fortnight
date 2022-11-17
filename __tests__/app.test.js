@@ -221,3 +221,99 @@ describe('7: /api/reviews/:review_id/comments', () => {
             });
     });
 });
+
+describe('8: /api/reviews/:review_id', () => {
+    test('PATCH: 200 - given review_id, update review object votes property by given number, leaving other properties unchanged', () => {
+        const updateVotes = {inc_votes: 4};
+        return request(app)
+            .patch('/api/reviews/1')
+            .send(updateVotes)
+            .expect(200)
+            .then(({body}) => {
+                expect(body.updated_review).toMatchObject({
+                    review_id: 1,
+                    title: 'Agricola',
+                    designer: 'Uwe Rosenberg',
+                    owner: 'mallionaire',
+                    review_img_url:
+                    'https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png',
+                    review_body: 'Farmyard fun!',
+                    category: 'euro game',
+                    created_at: "2021-01-18T10:00:20.514Z",
+                    votes: 5
+                });
+            });
+    });
+    test('PATCH: 200 - updates review object votes property when given number is negative', () => {
+        const updateVotes = {inc_votes: -2};
+        return request(app)
+            .patch('/api/reviews/2')
+            .send(updateVotes)
+            .expect(200)
+            .then(({body}) => {
+                expect(body.updated_review).toMatchObject({
+                    review_id: 2,
+                    title: 'Jenga',
+                    designer: 'Leslie Scott',
+                    owner: 'philippaclaire9',
+                    review_img_url:
+                    'https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png',
+                    review_body: 'Fiddly fun for all the family',
+                    category: 'dexterity',
+                    created_at: "2021-01-18T10:01:41.251Z",
+                    votes: 3
+                })
+            })
+    })
+    test('PATCH: 200 - sets votes = 0 when result of updating number of votes gives a negative number', () => {
+        const updateVotes = {inc_votes: -10};
+        return request(app)
+            .patch('/api/reviews/1')
+            .send(updateVotes)
+            .expect(200)
+            .then(({body}) => {
+                expect(body.updated_review).toMatchObject({
+                    review_id: 1,
+                    title: 'Agricola',
+                    designer: 'Uwe Rosenberg',
+                    owner: 'mallionaire',
+                    review_img_url:
+                    'https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png',
+                    review_body: 'Farmyard fun!',
+                    category: 'euro game',
+                    created_at: "2021-01-18T10:00:20.514Z",
+                    votes: 0
+                })
+            })
+    })
+    test('PATCH: 400 - invalid review_id given', () => {
+        const updateVotes = {inc_votes: 4};
+        return request(app)
+            .patch('/api/reviews/apple')
+            .send(updateVotes)
+            .expect(400)
+            .then(({body}) => {
+                expect(body.msg).toBe('invalid user input');
+            });
+    });
+    test('PATCH: 404 - review_id valid but non-existent, id not found', () => {
+        const updateVotes = {inc_votes: 4};
+        return request(app)
+            .patch('/api/reviews/1000')
+            .send(updateVotes)
+            .expect(404)
+            .then(({body}) => {
+                expect(body.msg).toBe('review_id not found');
+            });
+    });
+    test('PATCH: 400 - invalid inc_votes in request body (non-number)', () => {
+        const updateVotes = {inc_votes: 'banana'};
+        return request(app)
+            .patch('/api/reviews/2')
+            .send(updateVotes)
+            .expect(400)
+            .then(({body}) => {
+                expect(body.msg).toBe('invalid user input')
+            })
+    })
+});

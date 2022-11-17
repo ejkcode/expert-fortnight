@@ -77,5 +77,31 @@ const addCommentByReviewId = (review_id, newComment) => {
     });
 };
 
-module.exports = {fetchCategories, fetchReviews, fetchReviewById, fetchCommentByReviewId, addCommentByReviewId};
+const updateReviewById = (review_id, inc_votes) => {
+    return checkReviewIdExists(review_id)
+    .then(() => {
+        return db.query(`
+            UPDATE reviews
+            SET votes = votes + $1
+            WHERE review_id = $2
+            RETURNING *;
+        `, [inc_votes, review_id])
+        .then((result) => {
+            if (result.rows[0].votes <= 0) {
+                return db.query(`
+                    UPDATE reviews
+                    SET votes = 0
+                    WHERE review_id = $1
+                    RETURNING *;
+                `, [result.rows[0].review_id])
+                .then((result) => {
+                    return result.rows[0];
+                })
+            }
+            return result.rows[0];
+        });
+    })
+};
+
+module.exports = {fetchCategories, fetchReviews, fetchReviewById, fetchCommentByReviewId, addCommentByReviewId, updateReviewById};
 
