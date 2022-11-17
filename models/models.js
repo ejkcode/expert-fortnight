@@ -8,14 +8,27 @@ const fetchCategories = () => {
         });
 };
 
-const fetchReviews = () => {
-    return db.query(`
-    SELECT reviews.review_id,reviews.owner, reviews.title, reviews.category, reviews.review_img_url, reviews.created_at, reviews.votes, reviews.designer, COUNT(comments.review_id) AS comment_count
+const fetchReviews = (category, sort_by='created_at', order='DESC') => {
+    let queryString = `SELECT reviews.review_id,reviews.owner, reviews.title, reviews.category, reviews.review_img_url, reviews.created_at, reviews.votes, reviews.designer, COUNT(comments.review_id) AS comment_count
     FROM reviews
-    LEFT JOIN comments ON comments.review_id = reviews.review_id
-    GROUP BY reviews.review_id
-    ORDER BY reviews.created_at DESC;
-    `)
+    LEFT JOIN comments ON comments.review_id = reviews.review_id`
+    const queryValues = [];
+
+    const validCategories = ['euro game', 'social deduction', 'dexterity', "children's games"];
+    const validColumns = ['title', 'designer', 'owner', 'review_img_url', 'review_body', 'category', 'created_at', 'votes'];
+    const validOrders = ['ASC', 'DESC'];
+    if (category){
+        if (!validCategories.includes(category)){
+            return Promise.reject({status: 400, msg: 'category not found'});
+        };
+        queryString += ` WHERE category = $1`;
+        queryValues.push(category);
+    };
+    if (!validColumns.includes(sort_by) || !validOrders.includes(order)){
+        return Promise.reject({status: 400, msg: 'invalid sort query'});
+    };
+    queryString += ` GROUP BY reviews.review_id ORDER BY ${sort_by} ${order}`;
+    return db.query(queryString, queryValues)
     .then((result) => {
         return result.rows;
     });
