@@ -102,10 +102,10 @@ describe('4: /api/reviews', () => {
                     expect(body.reviews).toBeSortedBy('created_at', {descending: false})
                 });
         });
-        test('GET: 400 - category given does not exist, not equal to any in the categories table', () => {
+        test('GET: 404 - category given does not exist, not equal to any in the categories table', () => {
             return request(app)
                 .get('/api/reviews?category=banana')
-                .expect(400)
+                .expect(404)
                 .then(({body}) => {
                     expect(body.msg).toBe('category not found');
                 });

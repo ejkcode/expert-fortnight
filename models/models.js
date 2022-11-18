@@ -19,7 +19,7 @@ const fetchReviews = (category, sort_by='created_at', order='DESC') => {
     const validOrders = ['ASC', 'DESC'];
     if (category){
         if (!validCategories.includes(category)){
-            return Promise.reject({status: 400, msg: 'category not found'});
+            return Promise.reject({status: 404, msg: 'category not found'});
         };
         queryString += ` WHERE category = $1`;
         queryValues.push(category);
