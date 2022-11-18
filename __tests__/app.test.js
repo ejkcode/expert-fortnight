@@ -426,3 +426,27 @@ describe('9: /api/users', () => {
             });
     });
 });
+
+describe('12: /api/comments/:comment_id', () => {
+    test('DELETE: 204 - deletes comment given by comment_id, responds with nothing', () => {
+        return request(app)
+            .delete('/api/comments/1')
+            .expect(204)
+    });
+    test('DELETE: 400 - comment_id invalid', () => {
+        return request(app)
+            .delete('/api/comments/somethingbad')
+            .expect(400)
+            .then(({body}) => {
+                expect(body.msg).toBe('invalid user input');
+            });
+    });
+    test('DELETE: 404 - comment_id valid but not found', () => {
+        return request(app)
+            .delete('/api/comments/1000')
+            .expect(404)
+            .then(({body}) => {
+                expect(body.msg).toBe('comment_id not found');
+            });
+    });
+});

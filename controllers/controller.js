@@ -1,4 +1,4 @@
-const {fetchCategories, fetchReviews, fetchReviewById, fetchCommentByReviewId, addCommentByReviewId, updateReviewById, fetchUsers} = require('../models/models.js')
+const {fetchCategories, fetchReviews, fetchReviewById, fetchCommentByReviewId, addCommentByReviewId, updateReviewById, fetchUsers, removeCommentById} = require('../models/models.js')
 
 const getCategories = (req, res) => {
     fetchCategories()
@@ -70,5 +70,16 @@ const getUsers = (req, res, next) => {
     });
 }
 
-module.exports = {getCategories, getReviews, getReviewById, getCommentByReviewId, postCommentByReviewId, patchReviewById, getUsers};
+const deleteCommentById = (req, res, next) => {
+    const {comment_id} = req.params;
+    removeCommentById(comment_id)
+        .then(() => {
+            res.sendStatus(204);
+        })
+        .catch((err) => {
+            next(err);
+        });
+};
+
+module.exports = {getCategories, getReviews, getReviewById, getCommentByReviewId, postCommentByReviewId, patchReviewById, getUsers, deleteCommentById};
 
