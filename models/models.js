@@ -14,7 +14,7 @@ const fetchReviews = (category, sort_by='created_at', order='DESC') => {
     LEFT JOIN comments ON comments.review_id = reviews.review_id`
     const queryValues = [];
 
-    const validCategories = ['euro game', 'social deduction', 'dexterity', "children's games"];
+    const validCategories = ['euro game', 'social deduction', 'dexterity', 'children`s games'];
     const validColumns = ['title', 'designer', 'owner', 'review_img_url', 'review_body', 'category', 'created_at', 'votes'];
     const validOrders = ['ASC', 'DESC'];
     if (category){

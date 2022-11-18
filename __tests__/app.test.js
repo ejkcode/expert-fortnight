@@ -70,6 +70,14 @@ describe('4: /api/reviews', () => {
                     });
                 });
         });
+        test('GET: 200 - returns empty array when given category that has no reviews associated with it', () => {
+            return request(app)
+                .get('/api/reviews?category=children`s games')
+                .expect(200)
+                .then(({body}) => {
+                    expect(body.reviews.length).toBe(0);
+                });
+        });
         test('GET: 200 - if no category is given, defaults to returning all reviews', () => {
             return request(app)
                 .get('/api/reviews')
@@ -94,7 +102,7 @@ describe('4: /api/reviews', () => {
                     expect(body.reviews).toBeSortedBy('created_at', {descending: false})
                 });
         });
-        test('GET: 400 - category given not valid, not equal to any in the categories table', () => {
+        test('GET: 400 - category given does not exist, not equal to any in the categories table', () => {
             return request(app)
                 .get('/api/reviews?category=banana')
                 .expect(400)
