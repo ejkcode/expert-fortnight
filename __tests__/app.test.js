@@ -50,13 +50,94 @@ describe('4: /api/reviews', () => {
                 });
             });
     });
-    test('GET: 200 - produces a reviews array sorted by date in descending order', () => {
+    test('GET: 200 - produces a reviews array sorted by date in descending order (by default when no query given)', () => {
         return request(app)
             .get('/api/reviews')
             .expect(200)
             .then(({body}) => {
                 expect(body.reviews).toBeSortedBy('created_at', {descending: true});
             });
+    });
+    describe('11: /api/reviews queries', () => {
+        test('GET: 200 - when given category query returns reviews array only from that category', () => {
+            return request(app)
+                .get('/api/reviews?category=social deduction')
+                .expect(200)
+                .then(({body}) => {
+                    expect(body.reviews.length).toBe(11)
+                    body.reviews.forEach((review) => {
+                        expect(review.category).toBe('social deduction');
+                    });
+                });
+        });
+        test('GET: 200 - returns empty array when given category that has no reviews associated with it', () => {
+            return request(app)
+                .get('/api/reviews?category=children`s games')
+                .expect(200)
+                .then(({body}) => {
+                    expect(body.reviews.length).toBe(0);
+                });
+        });
+        test('GET: 200 - if no category is given, defaults to returning all reviews', () => {
+            return request(app)
+                .get('/api/reviews')
+                .expect(200)
+                .then(({body}) => {
+                    expect(body.reviews.length).toBe(13);
+                });
+        });
+        test('GET: 200 - when given sort by query, returns reviews array sorted by this value', () => {
+            return request(app)
+                .get('/api/reviews?sort_by=designer')
+                .expect(200)
+                .then(({body}) => {
+                    expect(body.reviews).toBeSortedBy('designer', {descending: true});
+                });
+        });
+        test('GET: 200 - when given an order, reviews array is ordered by this value', () => {
+            return request(app)
+                .get('/api/reviews?order=ASC')
+                .expect(200)
+                .then(({body}) => {
+                    expect(body.reviews).toBeSortedBy('created_at', {descending: false})
+                });
+        });
+        test('GET: 404 - category given does not exist, not equal to any in the categories table', () => {
+            return request(app)
+                .get('/api/reviews?category=banana')
+                .expect(404)
+                .then(({body}) => {
+                    expect(body.msg).toBe('category not found');
+                });
+        });
+        test('GET: 400 - sort by given not valid, not equal to any column in reviews table', () => {
+            return request(app)
+                .get('/api/reviews?sort_by=somethingbad')
+                .expect(400)
+                .then(({body}) => {
+                    expect(body.msg).toBe('invalid sort query');
+                });
+        });
+        test('GET: 400 - order given not valid, not equal to ASC or DESC', () => {
+            return request(app)
+                .get('/api/reviews?order=stuff')
+                .expect(400)
+                .then(({body}) => {
+                    expect(body.msg).toBe('invalid sort query');
+                });
+        });
+        test('GET: 200 - works for multiple queries on same request', () => {
+            return request(app)
+                .get('/api/reviews?category=social deduction&sort_by=votes&order=ASC')
+                .expect(200)
+                .then(({body}) => {
+                    expect(body.reviews.length).toBe(11);
+                    body.reviews.forEach((review) => {
+                        expect(review.category).toBe('social deduction');
+                    });
+                    expect(body.reviews).toBeSortedBy('votes', {descending:false});
+                });
+        });
     });
 });
 
@@ -95,24 +176,13 @@ describe('5: /api/reviews/:review_id', () => {
                 expect(body.msg).toBe('invalid user input');
             });
     });
-    describe('10: /api/reviews/;review_id (comment count)', () => {
+    describe('10: /api/reviews/:review_id (comment count)', () => {
         test('GET: 200 - review response object includes a comment_count property: total count of all comments with this review_id', () => {
             return request(app)
                 .get('/api/reviews/2')
                 .expect(200)
                 .then(({body}) => {
-                    expect(body.review).toMatchObject({
-                        review_id: 2,
-                        title: expect.any(String),
-                        review_body: expect.any(String),
-                        designer: expect.any(String),
-                        review_img_url: expect.any(String),
-                        votes: expect.any(Number),
-                        category: expect.any(String),
-                        owner: expect.any(String),
-                        created_at: expect.any(String),
-                        comment_count: '3'
-                    })
+                    expect(body.review.comment_count).toBe('3');
                 })
         });
     });
