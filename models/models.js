@@ -1,5 +1,6 @@
 const db = require('../db/connections.js');
 const {checkReviewIdExists, checkUserExistsInUsers} = require('../db/seeds/utils.js');
+const {readFile} = require('fs/promises');
 
 const fetchCategories = () => {
     return db.query(`SELECT * FROM categories`)
@@ -140,5 +141,13 @@ const removeCommentById = (comment_id) => {
     });
 };
 
-module.exports = {fetchCategories, fetchReviews, fetchReviewById, fetchCommentByReviewId, addCommentByReviewId, updateReviewById, fetchUsers, removeCommentById};
+const fetchEndpoints = () => {
+    return readFile(`${__dirname}/../endpoints.json`)
+    .then((contents) => {
+        const parsedContents = JSON.parse(contents)
+        return parsedContents;
+    });
+};
+
+module.exports = {fetchCategories, fetchReviews, fetchReviewById, fetchCommentByReviewId, addCommentByReviewId, updateReviewById, fetchUsers, removeCommentById, fetchEndpoints};
 

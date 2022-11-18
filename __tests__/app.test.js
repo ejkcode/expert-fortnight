@@ -450,3 +450,67 @@ describe('12: /api/comments/:comment_id', () => {
             });
     });
 });
+
+describe('13: /api', () => {
+    test('GET: 200 - responds with json object with one key for every endpoint', () => {
+        return request(app)
+            .get('/api')
+            .expect(200)
+            .then(({body}) => {
+                const jsonKeys = Object.keys(body.endpoints);
+                expect(jsonKeys).toEqual(["GET /api", "GET /api/categories", "GET /api/reviews", "GET /api/reviews/:review_id", "GET /api/reviews/:review_id/comments", "POST /api/reviews/:review_id/comments", "PATCH /api/reviews/:review_id", "GET /api/users", "DELETE /api/comments/:comment_id"]);
+            });
+   });
+   test('GET: 200 - each key representing an endpoint has a description, queries and exampleResponse propety, excluding the `GET /api` endpoint which only has a description property', () => {
+        return request(app)
+            .get('/api')
+            .expect(200)
+            .then(({body}) => {
+                for (const endpoint in body.endpoints) {
+                    if (endpoint != "GET /api") {
+                        expect(body.endpoints[endpoint]).toMatchObject({
+                            description: expect.any(String),
+                            queries: expect.any(Array) ,
+                            exampleResponse: expect.any(Object)
+                        }); 
+                    }               
+                    else {
+                        expect(body.endpoints[endpoint]).toMatchObject({
+                            description: expect.any(String)
+                        });
+                    };
+                };
+            });
+   });
+   test('GET: 200 - the queries property, where applicable, should only be non-empty for the `GET /api/reviews` endpoint', () => {
+        return request(app)
+            .get('/api')
+            .expect(200)
+            .then(({body}) => {
+                for (const endpoint in body.endpoints) {
+                    if (endpoint === "GET /api/reviews") {
+                        expect(body.endpoints[endpoint].queries).toEqual(["category", "sort_by", "order"])
+                    }               
+                    else if (endpoint != 'GET /api') {
+                        expect(body.endpoints[endpoint].queries).toEqual([]);
+                    };
+                };
+            });
+   });
+   test('GET: 200 - the exampleResponse property, where applicable, should be an object with a single key apart from the `DELETE` endpoint (as this responds with no content)', () => {
+    return request(app)
+            .get('/api')
+            .expect(200)
+            .then(({body}) => {
+                for (const endpoint in body.endpoints) {
+                    if (endpoint === "DELETE /api/comments/:comment_id") {
+                        expect(body.endpoints[endpoint].exampleResponse).toEqual({});
+                    }
+                    else if (endpoint != "GET /api" && endpoint != "DELETE /api/comments/:comment_id") {
+                        const exampleResponsePropertyKeys = Object.keys(body.endpoints[endpoint].exampleResponse)
+                        expect(exampleResponsePropertyKeys.length).toBe(1);
+                    };
+                };
+            });
+   });
+});
